@@ -1,0 +1,136 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: xrootd-server-a
+  name: xrootd-server-a
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      k8s-app: xrootd-server-a
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        k8s-app: xrootd-server-a
+    spec:
+      tolerations:
+      - key: "nautilus.io/noceph" 
+        operator: "Exists"
+        effect: "NoSchedule"
+      - key: "nautilus.io/ceph" 
+        operator: "Exists"
+        effect: "NoSchedule"
+      - key: "nautilus.io/testing" 
+        operator: "Exists"
+        effect: "NoSchedule"
+      - key: "nautilus.io/stashcache"
+        operator: "Exists"
+        effect: "NoSchedule"
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: k8s-app
+                operator: In
+                values:
+                - xrootd-server-a
+                - xrootd-server-b
+                - xrootd-redi-a
+                - xrootd-redi-b
+            topologyKey: "kubernetes.io/hostname"
+      hostNetwork: True
+      containers:
+      - env:
+        - name: OSG_FQDN
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        image: aaarora/gc-500gbps:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 2094
+        name: xrootd-server-a
+        resources:
+          limits:
+            cpu: 48
+            memory: 100Gi
+          requests:
+            cpu: 1
+            memory: 2Gi
+        volumeMounts:
+        - mountPath: /mnt/ramdisk/
+          name: cache-vol
+        - mountPath: /etc/xrootd/xrootd-third-party-copy.cfg
+          name: xrootd-server-conf
+          subPath: xrootd-third-party-copy.cfg
+        - mountPath: /home/makeFile
+          name: xrootd-server-conf
+          subPath: makeFile
+        - mountPath: /etc/xrootd/auth-file-noauth
+          name: xrootd-server-conf
+          subPath: auth-file-noauth
+        - mountPath: /etc/supervisord.d/10-xrootd.conf
+          name: xrootd-server-supervisor
+          subPath: supervisord.conf
+        - mountPath: /etc/telegraf/telegraf.conf
+          name: telegraf-conf
+          subPath: telegraf.conf
+        - mountPath: /etc/pki/CA/private/OSG-Test-CA.key
+          name: ca
+          subPath: OSG-Test-CA.pem
+      nodeSelector:
+        nautilus.io/network: '100000'
+        nautilus.io/region: 'ucsd'
+        nautilus.io/processor: 'AMD_EPYC_7252_8-Core_Processor'
+        # kubernetes.io/hostname: k8s-igrok-02.calit2.optiputer.net
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: cache-vol
+        emptyDir:
+          medium: Memory
+          sizeLimit: 1Gi
+      - name: ca
+        secret:
+          secretName: https-self-certs
+          items:
+          - key: OSG-Test-CA.pem
+            path: OSG-Test-CA.pem
+          defaultMode: 0644
+      - name: xrootd-server-conf
+        configMap: 
+          name: xrootd-server-conf
+          items:
+          - key: xrootd-third-party-copy.cfg
+            path: xrootd-third-party-copy.cfg
+          - key: makeFile 
+            path: makeFile
+          - key: auth-file-noauth
+            path: auth-file-noauth
+      - name: telegraf-conf
+        secret:
+          secretName: telegraf-conf
+          items:
+          - key: telegraf.conf
+            path: telegraf.conf
+          defaultMode: 0644
+      - name: xrootd-server-supervisor
+        configMap: 
+          name: xrootd-server-supervisor
+          items:
+          - key: supervisord.conf
+            path: supervisord.conf
