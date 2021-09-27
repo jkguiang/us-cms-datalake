@@ -33,19 +33,6 @@ spec:
       - key: "nautilus.io/stashcache"
         operator: "Exists"
         effect: "NoSchedule"
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: k8s-app
-                operator: In
-                values:
-                - xrootd-server-a
-                - xrootd-server-b
-                - xrootd-redi-a
-                - xrootd-redi-b
-            topologyKey: "kubernetes.io/hostname"
       hostNetwork: True
       containers:
       - env:
@@ -72,9 +59,9 @@ spec:
         volumeMounts:
         - mountPath: /mnt/ramdisk/
           name: cache-vol
-        - mountPath: /etc/xrootd/xrootd-third-party-copy.cfg
+        - mountPath: /etc/xrootd/xrootd.cfg
           name: xrootd-server-conf
-          subPath: xrootd-third-party-copy.cfg
+          subPath: xrootd.cfg
         - mountPath: /home/makeFile
           name: xrootd-server-conf
           subPath: makeFile
@@ -84,17 +71,11 @@ spec:
         - mountPath: /etc/supervisord.d/10-xrootd.conf
           name: xrootd-server-supervisor
           subPath: supervisord.conf
-        - mountPath: /etc/telegraf/telegraf.conf
-          name: telegraf-conf
-          subPath: telegraf.conf
         - mountPath: /etc/pki/CA/private/OSG-Test-CA.key
           name: ca
           subPath: OSG-Test-CA.pem
       nodeSelector:
-        nautilus.io/network: '100000'
-        nautilus.io/region: 'ucsd'
-        nautilus.io/processor: 'AMD_EPYC_7252_8-Core_Processor'
-        # kubernetes.io/hostname: k8s-igrok-02.calit2.optiputer.net
+        kubernetes.io/hostname: k8s-igrok-02.calit2.optiputer.net
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -115,19 +96,12 @@ spec:
         configMap: 
           name: xrootd-server-conf
           items:
-          - key: xrootd-third-party-copy.cfg
-            path: xrootd-third-party-copy.cfg
+          - key: xrootd.cfg
+            path: xrootd.cfg
           - key: makeFile 
             path: makeFile
           - key: auth-file-noauth
             path: auth-file-noauth
-      - name: telegraf-conf
-        secret:
-          secretName: telegraf-conf
-          items:
-          - key: telegraf.conf
-            path: telegraf.conf
-          defaultMode: 0644
       - name: xrootd-server-supervisor
         configMap: 
           name: xrootd-server-supervisor

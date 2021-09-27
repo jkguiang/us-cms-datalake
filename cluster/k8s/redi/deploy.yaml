@@ -59,26 +59,20 @@ spec:
         volumeMounts:
         - mountPath: /mnt/ramdisk/
           name: cache-vol
-        - mountPath: /etc/xrootd/xrootd-third-party-copy.cfg
+        - mountPath: /etc/xrootd/xrootd.cfg
           name: xrootd-redi-conf
-          subPath: xrootd-third-party-copy.cfg
+          subPath: xrootd.cfg
         - mountPath: /etc/xrootd/auth-file-noauth
           name: xrootd-redi-conf
           subPath: auth-file-noauth
         - mountPath: /etc/supervisord.d/10-xrootd.conf
           name: xrootd-redi-supervisor
           subPath: supervisord.conf
-        - mountPath: /etc/telegraf/telegraf.conf
-          name: telegraf-conf
-          subPath: telegraf.conf
         - mountPath: /etc/pki/CA/private/OSG-Test-CA.key
           name: ca
           subPath: OSG-Test-CA.pem
       nodeSelector:
-        #kubernetes.io/hostname: k8s-igrok-02.calit2.ucsd.edu
-        nautilus.io/network: '100000'
-        nautilus.io/region: 'ucsd'
-        nautilus.io/processor: 'AMD_EPYC_7252_8-Core_Processor'
+        kubernetes.io/hostname: k8s-igrok-02.calit2.ucsd.edu
       dnsPolicy: ClusterFirstWithHostNet
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -97,17 +91,10 @@ spec:
         configMap: 
           name: xrootd-redi-conf
           items:
-          - key: xrootd-third-party-copy.cfg
-            path: xrootd-third-party-copy.cfg
+          - key: xrootd.cfg
+            path: xrootd.cfg
           - key: auth-file-noauth
             path: auth-file-noauth
-      - name: telegraf-conf
-        secret:
-          secretName: telegraf-conf
-          items:
-          - key: telegraf.conf
-            path: telegraf.conf
-          defaultMode: 0644
       - name: xrootd-redi-supervisor
         configMap: 
           name: xrootd-redi-supervisor
