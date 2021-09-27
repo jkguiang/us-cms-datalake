@@ -30,4 +30,4 @@ jobs:
         push: true
         context: cluster/docker
         file: cluster/docker/Dockerfile
-        tags: aaarora/xrootd-origin:latest
+        tags: jguiang/us-cms-datalake-cluster:latest
