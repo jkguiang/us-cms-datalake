@@ -34,11 +34,9 @@ cd tmp_create_package/${CMSSWVERSION}/src/PhysicsTools/NanoAODTools/
 cmsenv
 scram b -j
 
-# Copy NanoCORE
-cp -r ../../../../../NanoTools .
+# Setup NanoCORE
+git clone https://github.com/cmstas/NanoTools
 cd NanoTools/NanoCORE # tmp_create_package/CMSSW_10_2_13/src/PhysicsTools/NanoAODTools/NanoTools/NanoCORE
-
-# Re-compile NanoCORE to make sure
 make clean
 make -j
 
