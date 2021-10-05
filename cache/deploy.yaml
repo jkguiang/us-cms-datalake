@@ -2,13 +2,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    k8s-app: xrootd-server-a
-  name: xrootd-server-a
+    k8s-app: us-cms-datalake-cache
+  name: us-cms-datalake-cache
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      k8s-app: xrootd-server-a
+      k8s-app: us-cms-datalake-cache
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -18,7 +18,7 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        k8s-app: xrootd-server-a
+        k8s-app: us-cms-datalake-cache
     spec:
       tolerations:
       - key: "nautilus.io/noceph" 
@@ -33,22 +33,19 @@ spec:
       - key: "nautilus.io/stashcache"
         operator: "Exists"
         effect: "NoSchedule"
-      hostNetwork: True
       containers:
       - env:
+        - name: ORIGIN_REDI
+          value:  
         - name: OSG_FQDN
           valueFrom:
             fieldRef:
               fieldPath: status.podIP
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
-        image: aaarora/gc-500gbps:latest
+        image: aaarora/us-cms-datalake:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 2094
-        name: xrootd-server-a
+        name: us-cms-datalake-cache
         resources:
           limits:
             cpu: 48
@@ -57,19 +54,17 @@ spec:
             cpu: 1
             memory: 2Gi
         volumeMounts:
-        - mountPath: /mnt/ramdisk/
-          name: cache-vol
         - mountPath: /etc/xrootd/xrootd.cfg
-          name: xrootd-server-conf
+          name: cache-conf
           subPath: xrootd.cfg
         - mountPath: /home/makeFile
-          name: xrootd-server-conf
+          name: cache-conf
           subPath: makeFile
         - mountPath: /etc/xrootd/auth-file-noauth
-          name: xrootd-server-conf
+          name: cache-conf
           subPath: auth-file-noauth
         - mountPath: /etc/supervisord.d/10-xrootd.conf
-          name: xrootd-server-supervisor
+          name: cache-supervisor
           subPath: supervisord.conf
         - mountPath: /etc/pki/CA/private/OSG-Test-CA.key
           name: ca
@@ -81,10 +76,6 @@ spec:
       schedulerName: default-scheduler
       terminationGracePeriodSeconds: 30
       volumes:
-      - name: cache-vol
-        emptyDir:
-          medium: Memory
-          sizeLimit: 1Gi
       - name: ca
         secret:
           secretName: https-self-certs
@@ -92,9 +83,9 @@ spec:
           - key: OSG-Test-CA.pem
             path: OSG-Test-CA.pem
           defaultMode: 0644
-      - name: xrootd-server-conf
+      - name: cache-conf
         configMap: 
-          name: xrootd-server-conf
+          name: cache-conf
           items:
           - key: xrootd.cfg
             path: xrootd.cfg
@@ -102,9 +93,9 @@ spec:
             path: makeFile
           - key: auth-file-noauth
             path: auth-file-noauth
-      - name: xrootd-server-supervisor
+      - name: cache-supervisor
         configMap: 
-          name: xrootd-server-supervisor
+          name: cache-supervisor
           items:
           - key: supervisord.conf
             path: supervisord.conf

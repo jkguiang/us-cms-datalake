@@ -1,0 +1,18 @@
+resources:
+  - deploy.yaml
+
+configMapGenerator:
+  - name: cache-conf
+    files:
+      - xrootd.cfg
+      - auth-file-noauth
+      - makeFile
+  - name: cache-supervisor
+    files:
+      - supervisord.conf
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+commonLabels:
+  app: xrootd-server-a

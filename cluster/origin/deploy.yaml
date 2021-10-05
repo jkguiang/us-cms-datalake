@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: us-cms-datalake-origin
+  name: us-cms-datalake-origin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: us-cms-datalake-origin
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        k8s-app: us-cms-datalake-origin
+    spec:
+      tolerations:
+      - key: "nautilus.io/noceph" 
+        operator: "Exists"
+        effect: "NoSchedule"
+      - key: "nautilus.io/ceph" 
+        operator: "Exists"
+        effect: "NoSchedule"
+      - key: "nautilus.io/testing" 
+        operator: "Exists"
+        effect: "NoSchedule"
+      - key: "nautilus.io/stashcache"
+        operator: "Exists"
+        effect: "NoSchedule"
+      containers:
+      - env:
+        - name: OSG_FQDN
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        image: jguiang/us-cms-datalake-cluster:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 2094
+        name: us-cms-datalake-origin
+        resources:
+          limits:
+            cpu: 48
+            memory: 100Gi
+          requests:
+            cpu: 1
+            memory: 2Gi
+        volumeMounts:
+        - mountPath: /etc/xrootd/xrootd.cfg
+          name: xrootd-server-conf
+          subPath: xrootd.cfg
+        - mountPath: /home/makeFile
+          name: xrootd-server-conf
+          subPath: makeFile
+        - mountPath: /etc/xrootd/auth-file-noauth
+          name: xrootd-server-conf
+          subPath: auth-file-noauth
+        - mountPath: /etc/supervisord.d/10-xrootd.conf
+          name: xrootd-server-supervisor
+          subPath: supervisord.conf
+        - mountPath: /etc/pki/CA/private/OSG-Test-CA.key
+          name: ca
+          subPath: OSG-Test-CA.pem
+      nodeSelector:
+        kubernetes.io/hostname: k8s-igrok-02.calit2.optiputer.net
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: ca
+        secret:
+          secretName: https-self-certs
+          items:
+          - key: OSG-Test-CA.pem
+            path: OSG-Test-CA.pem
+          defaultMode: 0644
+      - name: xrootd-server-conf
+        configMap: 
+          name: xrootd-server-conf
+          items:
+          - key: xrootd.cfg
+            path: xrootd.cfg
+          - key: makeFile 
+            path: makeFile
+          - key: auth-file-noauth
+            path: auth-file-noauth
+      - name: xrootd-server-supervisor
+        configMap: 
+          name: xrootd-server-supervisor
+          items:
+          - key: supervisord.conf
+            path: supervisord.conf

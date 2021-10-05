@@ -2,12 +2,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    k8s-app: xrootd-redi-a
-  name: xrootd-redi-a
+    k8s-app: us-cms-datalake-origin-redi
+  name: us-cms-datalake-origin-redi
 spec:
   selector:
     matchLabels:
-      k8s-app: xrootd-redi-a
+      k8s-app: us-cms-datalake-origin-redi
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -17,7 +17,7 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        k8s-app: xrootd-redi-a
+        k8s-app: us-cms-datalake-origin-redi
     spec:
       tolerations:
       - key: "nautilus.io/stashcache"
@@ -39,16 +39,12 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.podIP
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
-        image: aaarora/gc-500gbps:latest
+        image: jguiang/us-cms-datalake-cluster:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 2094
         - containerPort: 2213
-        name: xrootd-redi-a
+        name: us-cms-datalake-origin-redi
         resources:
           limits:
             cpu: 20
@@ -57,8 +53,6 @@ spec:
             cpu: 2
             memory: 2Gi
         volumeMounts:
-        - mountPath: /mnt/ramdisk/
-          name: cache-vol
         - mountPath: /etc/xrootd/xrootd.cfg
           name: xrootd-redi-conf
           subPath: xrootd.cfg
@@ -78,8 +72,6 @@ spec:
       schedulerName: default-scheduler
       terminationGracePeriodSeconds: 30
       volumes:
-      - name: cache-vol
-        emptyDir: {}
       - name: ca
         secret:
           secretName: https-self-certs
