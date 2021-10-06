@@ -28,6 +28,6 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        context: cluster/docker
-        file: cluster/docker/Dockerfile
+        context: /docker
+        file: /docker/Dockerfile
         tags: jguiang/us-cms-datalake-cluster:latest
