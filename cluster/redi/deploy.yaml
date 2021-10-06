@@ -19,19 +19,19 @@ spec:
       labels:
         k8s-app: us-cms-datalake-origin-redi
     spec:
-      tolerations:
-      - key: "nautilus.io/stashcache"
-        operator: "Exists"
-        effect: "NoSchedule"
-      - key: "nautilus.io/noceph" 
-        operator: "Exists"
-        effect: "NoSchedule"
-      - key: "nautilus.io/ceph" 
-        operator: "Exists"
-        effect: "NoSchedule"
-      - key: "nautilus.io/testing" 
-        operator: "Exists"
-        effect: "NoSchedule"
+      # tolerations:
+      # - key: "nautilus.io/stashcache"
+      #   operator: "Exists"
+      #   effect: "NoSchedule"
+      # - key: "nautilus.io/noceph" 
+      #   operator: "Exists"
+      #   effect: "NoSchedule"
+      # - key: "nautilus.io/ceph" 
+      #   operator: "Exists"
+      #   effect: "NoSchedule"
+      # - key: "nautilus.io/testing" 
+      #   operator: "Exists"
+      #   effect: "NoSchedule"
       hostNetwork: true
       containers:
       - env:
@@ -53,6 +53,8 @@ spec:
             cpu: 2
             memory: 2Gi
         volumeMounts:
+        - mountPath: /mnt
+          name: ephemeral
         - mountPath: /etc/xrootd/xrootd.cfg
           name: xrootd-redi-conf
           subPath: xrootd.cfg
@@ -65,13 +67,15 @@ spec:
         - mountPath: /etc/pki/CA/private/OSG-Test-CA.key
           name: ca
           subPath: OSG-Test-CA.pem
-      nodeSelector:
-        kubernetes.io/hostname: k8s-igrok-02.calit2.ucsd.edu
+      # nodeSelector:
+      #   kubernetes.io/hostname: k8s-igrok-02.calit2.ucsd.edu
       dnsPolicy: ClusterFirstWithHostNet
       restartPolicy: Always
       schedulerName: default-scheduler
       terminationGracePeriodSeconds: 30
       volumes:
+      - name: ephemeral
+        emptyDir: {}
       - name: ca
         secret:
           secretName: https-self-certs

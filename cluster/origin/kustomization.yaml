@@ -2,12 +2,12 @@ resources:
   - deploy.yaml
 
 configMapGenerator:
-  - name: xrootd-server-conf
+  - name: origin-conf
     files:
       - xrootd.cfg
       - auth-file-noauth
       - makeFile
-  - name: xrootd-server-supervisor
+  - name: origin-supervisor
     files:
       - supervisord.conf
 
@@ -15,4 +15,4 @@ generatorOptions:
   disableNameSuffixHash: true
 
 commonLabels:
-  app: xrootd-server-a
+  app: us-cms-datalake-origin
