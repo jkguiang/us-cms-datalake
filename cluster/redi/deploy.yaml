@@ -38,7 +38,7 @@ spec:
         - name: OSG_FQDN
           valueFrom:
             fieldRef:
-              fieldPath: status.podIP
+              fieldPath: spec.nodeName
         image: jguiang/us-cms-datalake-cluster:latest
         imagePullPolicy: Always
         ports:

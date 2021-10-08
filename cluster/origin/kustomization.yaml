@@ -6,7 +6,6 @@ configMapGenerator:
     files:
       - xrootd.cfg
       - auth-file-noauth
-      - makeFile
   - name: origin-supervisor
     files:
       - supervisord.conf

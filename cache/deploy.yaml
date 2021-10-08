@@ -5,7 +5,7 @@ metadata:
     k8s-app: us-cms-datalake-cache
   name: us-cms-datalake-cache
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       k8s-app: us-cms-datalake-cache
@@ -20,28 +20,13 @@ spec:
       labels:
         k8s-app: us-cms-datalake-cache
     spec:
-      tolerations:
-      - key: "nautilus.io/noceph" 
-        operator: "Exists"
-        effect: "NoSchedule"
-      - key: "nautilus.io/ceph" 
-        operator: "Exists"
-        effect: "NoSchedule"
-      - key: "nautilus.io/testing" 
-        operator: "Exists"
-        effect: "NoSchedule"
-      - key: "nautilus.io/stashcache"
-        operator: "Exists"
-        effect: "NoSchedule"
       containers:
       - env:
-        - name: ORIGIN_REDI
-          value:  
         - name: OSG_FQDN
           valueFrom:
             fieldRef:
               fieldPath: status.podIP
-        image: aaarora/us-cms-datalake:latest
+        image: jguiang/us-cms-datalake-cluster:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 2094
@@ -57,9 +42,6 @@ spec:
         - mountPath: /etc/xrootd/xrootd.cfg
           name: cache-conf
           subPath: xrootd.cfg
-        - mountPath: /home/makeFile
-          name: cache-conf
-          subPath: makeFile
         - mountPath: /etc/xrootd/auth-file-noauth
           name: cache-conf
           subPath: auth-file-noauth
@@ -69,8 +51,6 @@ spec:
         - mountPath: /etc/pki/CA/private/OSG-Test-CA.key
           name: ca
           subPath: OSG-Test-CA.pem
-      nodeSelector:
-        kubernetes.io/hostname: k8s-igrok-02.calit2.optiputer.net
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -89,8 +69,6 @@ spec:
           items:
           - key: xrootd.cfg
             path: xrootd.cfg
-          - key: makeFile 
-            path: makeFile
           - key: auth-file-noauth
             path: auth-file-noauth
       - name: cache-supervisor

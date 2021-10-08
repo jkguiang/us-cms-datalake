@@ -39,7 +39,7 @@ spec:
         - name: OSG_FQDN
           valueFrom:
             fieldRef:
-              fieldPath: status.podIP
+              fieldPath: spec.nodeName
         image: jguiang/us-cms-datalake-cluster:latest
         imagePullPolicy: Always
         ports:
@@ -60,9 +60,6 @@ spec:
         - mountPath: /etc/xrootd/xrootd.cfg
           name: origin-conf
           subPath: xrootd.cfg
-        - mountPath: /home/makeFile
-          name: origin-conf
-          subPath: makeFile
         - mountPath: /etc/xrootd/auth-file-noauth
           name: origin-conf
           subPath: auth-file-noauth
@@ -94,8 +91,6 @@ spec:
           items:
           - key: xrootd.cfg
             path: xrootd.cfg
-          - key: makeFile 
-            path: makeFile
           - key: auth-file-noauth
             path: auth-file-noauth
       - name: origin-supervisor
