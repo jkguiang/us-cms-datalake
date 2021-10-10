@@ -69,7 +69,7 @@ spec:
           subPath: OSG-Test-CA.pem
       # nodeSelector:
       #   kubernetes.io/hostname: k8s-igrok-02.calit2.ucsd.edu
-      dnsPolicy: ClusterFirstWithHostNet
+      dnsPolicy: Default
       restartPolicy: Always
       schedulerName: default-scheduler
       terminationGracePeriodSeconds: 30

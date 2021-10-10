@@ -5,7 +5,7 @@ metadata:
     k8s-app: us-cms-datalake-cache
   name: us-cms-datalake-cache
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       k8s-app: us-cms-datalake-cache
@@ -20,6 +20,7 @@ spec:
       labels:
         k8s-app: us-cms-datalake-cache
     spec:
+      hostNetwork: true
       containers:
       - env:
         - name: OSG_FQDN
@@ -33,12 +34,16 @@ spec:
         name: us-cms-datalake-cache
         resources:
           limits:
-            cpu: 48
-            memory: 100Gi
+            cpu: 8
+            memory: 10Gi
+            ephemeral-storage: 20Gi
           requests:
-            cpu: 1
-            memory: 2Gi
+            cpu: 2
+            memory: 8Gi
+            ephemeral-storage: 5Gi
         volumeMounts:
+        - mountPath: /mnt
+          name: ephemeral
         - mountPath: /etc/xrootd/xrootd.cfg
           name: cache-conf
           subPath: xrootd.cfg
@@ -51,11 +56,13 @@ spec:
         - mountPath: /etc/pki/CA/private/OSG-Test-CA.key
           name: ca
           subPath: OSG-Test-CA.pem
-      dnsPolicy: ClusterFirst
+      dnsPolicy: Default
       restartPolicy: Always
       schedulerName: default-scheduler
       terminationGracePeriodSeconds: 30
       volumes:
+      - name: ephemeral
+        emptyDir: {}
       - name: ca
         secret:
           secretName: https-self-certs
