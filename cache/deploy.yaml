@@ -22,13 +22,13 @@ spec:
     spec:
       hostNetwork: true
       containers:
-      - env:
+      - image: jguiang/us-cms-datalake-cluster:latest
+        imagePullPolicy: Always
+        env:
         - name: OSG_FQDN
           valueFrom:
             fieldRef:
-              fieldPath: status.podIP
-        image: jguiang/us-cms-datalake-cluster:latest
-        imagePullPolicy: Always
+              fieldPath: spec.nodeName 
         ports:
         - containerPort: 2094
         name: us-cms-datalake-cache
@@ -47,15 +47,15 @@ spec:
         - mountPath: /etc/xrootd/xrootd.cfg
           name: cache-conf
           subPath: xrootd.cfg
+        - mountPath: /etc/scitokens/scitokens.cfg
+          name: cache-conf
+          subPath: scitokens.cfg
         - mountPath: /etc/xrootd/auth-file-noauth
           name: cache-conf
           subPath: auth-file-noauth
         - mountPath: /etc/supervisord.d/10-xrootd.conf
           name: cache-supervisor
           subPath: supervisord.conf
-        - mountPath: /etc/pki/CA/private/OSG-Test-CA.key
-          name: ca
-          subPath: OSG-Test-CA.pem
       dnsPolicy: Default
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -63,19 +63,14 @@ spec:
       volumes:
       - name: ephemeral
         emptyDir: {}
-      - name: ca
-        secret:
-          secretName: https-self-certs
-          items:
-          - key: OSG-Test-CA.pem
-            path: OSG-Test-CA.pem
-          defaultMode: 0644
       - name: cache-conf
         configMap: 
           name: cache-conf
           items:
           - key: xrootd.cfg
             path: xrootd.cfg
+          - key: scitokens.cfg
+            path: scitokens.cfg
           - key: auth-file-noauth
             path: auth-file-noauth
       - name: cache-supervisor

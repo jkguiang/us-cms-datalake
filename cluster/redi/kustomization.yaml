@@ -5,15 +5,11 @@ configMapGenerator:
   - name: xrootd-redi-conf
     files:
       - xrootd.cfg
+      - scitokens.cfg
       - auth-file-noauth
   - name: xrootd-redi-supervisor
     files:
       - supervisord.conf
-
-secretGenerator:
-- name: https-self-certs
-  files:
-    - OSG-Test-CA.pem
 
 generatorOptions:
   disableNameSuffixHash: true

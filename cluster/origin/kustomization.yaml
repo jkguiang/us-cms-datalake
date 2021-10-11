@@ -5,6 +5,7 @@ configMapGenerator:
   - name: origin-conf
     files:
       - xrootd.cfg
+      - scitokens.cfg
       - auth-file-noauth
   - name: origin-supervisor
     files:

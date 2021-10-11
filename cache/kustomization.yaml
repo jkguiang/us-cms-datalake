@@ -5,6 +5,7 @@ configMapGenerator:
   - name: cache-conf
     files:
       - xrootd.cfg
+      - scitokens.cfg
       - auth-file-noauth
   - name: cache-supervisor
     files:

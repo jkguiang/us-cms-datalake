@@ -20,28 +20,15 @@ spec:
       labels:
         k8s-app: us-cms-datalake-origin
     spec:
-      # tolerations:
-      # - key: "nautilus.io/noceph" 
-      #   operator: "Exists"
-      #   effect: "NoSchedule"
-      # - key: "nautilus.io/ceph" 
-      #   operator: "Exists"
-      #   effect: "NoSchedule"
-      # - key: "nautilus.io/testing" 
-      #   operator: "Exists"
-      #   effect: "NoSchedule"
-      # - key: "nautilus.io/stashcache"
-      #   operator: "Exists"
-      #   effect: "NoSchedule"
       hostNetwork: true
       containers:
-      - env:
+      - image: jguiang/us-cms-datalake-cluster:latest
+        imagePullPolicy: Always
+        env:
         - name: OSG_FQDN
           valueFrom:
             fieldRef:
-              fieldPath: spec.nodeName
-        image: jguiang/us-cms-datalake-cluster:latest
-        imagePullPolicy: Always
+              fieldPath: spec.nodeName 
         ports:
         - containerPort: 2094
         name: us-cms-datalake-origin
@@ -60,15 +47,15 @@ spec:
         - mountPath: /etc/xrootd/xrootd.cfg
           name: origin-conf
           subPath: xrootd.cfg
+        - mountPath: /etc/scitokens/scitokens.cfg
+          name: origin-conf
+          subPath: scitokens.cfg
         - mountPath: /etc/xrootd/auth-file-noauth
           name: origin-conf
           subPath: auth-file-noauth
         - mountPath: /etc/supervisord.d/10-xrootd.conf
           name: origin-supervisor
           subPath: supervisord.conf
-        - mountPath: /etc/pki/CA/private/OSG-Test-CA.key
-          name: ca
-          subPath: OSG-Test-CA.pem
       # nodeSelector:
       #   kubernetes.io/hostname: k8s-igrok-02.calit2.optiputer.net
       dnsPolicy: Default
@@ -78,19 +65,14 @@ spec:
       volumes:
       - name: ephemeral
         emptyDir: {}
-      - name: ca
-        secret:
-          secretName: https-self-certs
-          items:
-          - key: OSG-Test-CA.pem
-            path: OSG-Test-CA.pem
-          defaultMode: 0644
       - name: origin-conf
         configMap: 
           name: origin-conf
           items:
           - key: xrootd.cfg
             path: xrootd.cfg
+          - key: scitokens.cfg
+            path: scitokens.cfg
           - key: auth-file-noauth
             path: auth-file-noauth
       - name: origin-supervisor
