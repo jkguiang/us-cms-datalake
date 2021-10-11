@@ -25,14 +25,13 @@ for arg in "$@"; do
 done
 
 # Set up
-tar -zxvf package.tar.gz
 source /root/miniconda3/etc/profile.d/conda.sh
 conda activate test-env
 
 # Write test script
 cat > test.py << EOL
-import uproot
-import uproot_methods
+import uproot3
+import uproot3_methods
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -51,7 +50,9 @@ EOL
 
 # Run test script
 if [[ "${input_file}" != "" ]]; then
+    echo "Running test..."
     python test.py
+    echo "Done."
 else
     echo "ERROR: no input file provided!"
     echo ""
