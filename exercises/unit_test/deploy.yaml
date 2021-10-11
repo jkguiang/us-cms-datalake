@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: us-cms-datalake-test
+  name: us-cms-datalake-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: us-cms-datalake-test
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        k8s-app: us-cms-datalake-test
+    spec:
+      containers:
+      - image: jguiang/us-cms-datalake-test:latest
+        # command: [ "/bin/bash", "-c", "--" ]
+        # args: [ "./run.sh --input_file=root://redirector:port//path/to/file;" ]
+        command: [ "/bin/bash", "-c", "--" ]
+        args: [ "while true; do sleep 30; done;" ]
+        imagePullPolicy: Always
+        name: us-cms-datalake-test
+        resources:
+          limits:
+            cpu: 4
+            memory: 4Gi
+          requests:
+            cpu: 2
+            memory: 2Gi
+        volumeMounts:
+        - mountPath: /home/
+          name: cache-vol
+        - mountPath: /home/run.sh
+          name: us-cms-datalake-test-exe-configmap
+          subPath: run.sh
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      schedulerName: default-scheduler
+      volumes:
+      - name: cache-vol
+        emptyDir: {}
+      - name: us-cms-datalake-test-exe-configmap
+        configMap: 
+          name: us-cms-datalake-test-exe-configmap
+          items:
+          - key: run.sh
+            path: run.sh
+          defaultMode: 0777
