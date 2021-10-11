@@ -17,6 +17,6 @@ RUN $CONDA init
 RUN $CONDA config --set auto_activate_base false && $CONDA config --add channels conda-forge
 # Set up conda environment for RTT tests
 RUN $CONDA create --name test-env -y && \
-    $CONDA install -n test-env -y uproot xrootd awkward numba pandas
+    $CONDA install -n test-env -y uproot3 xrootd awkward numba numpy pandas matplotlib
 
 WORKDIR /home
