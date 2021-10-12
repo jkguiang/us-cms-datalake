@@ -1,33 +1,38 @@
 ### Instructions
-1. Create `package.tar.gz`
+0. Ensure Data Lake prototype is set up (cf. parent dir)
+
+1. Create the skimmer package
 ```
-sh create_package.sh
+sh run.sh --no_skim
 ```
 
-(Optional) Test it locally
+2. Move it somewhere that is publicly accessible
 ```
-sh run.sh package.tar.gz /path/to/nanoaod.root
+mv package.tar.gz ~/public_html/dump/package.tar.gz
+chmod 755 ~/public_html/dump/package.tar.gz
 ```
 
-2. Create configmaps
+3. Create configmap for executable
 ```
-kubectl create configmap skim-test-pkg-configmap --from-file=package.tar.gz
 kubectl create configmap skim-test-exe-configmap --from-file=run.sh
 ```
 
-3. Deploy pod
+4. Deploy pod (and potentially wait > 40 minutes)
 ```
 kubectl create -f deploy.yaml
 ```
 
-4. Ensure Data Lake prototype is set up (cf. parent dir)
-
 5. Start an interactive session on the pod
 ```
-kubectl exec -it skim-test -- /bin/bash
+kubectl exec -it skim-test-<hash> -- /bin/bash
 ```
 
-6. Run the test
+6. Download the skimmer package
 ```
-sh run.sh package.tar.gz root://redirector.ip:1094//path/to/file.root
+curl -O http://uaf-10.t2.ucsd.edu/~username/dump/package.tar.gz
+```
+
+7. Run the test
+```
+sh run.sh --input_file=root://cache:2094//path/to/file.root --package=/path/to/package.tar.gz
 ```
