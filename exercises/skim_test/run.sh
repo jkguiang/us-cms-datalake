@@ -1,27 +1,50 @@
 #!/bin/bash
 
-usage()
+print_help()
 {
     echo "Usage:"
     echo ""
-    echo "  sh run.sh PACKAGE.tar.gz NANOAODPATH [/path/to/package.tar.gz]"
+    echo "  sh run.sh [--input_file=/path/to/nanoaod.root] [--package=/path/to/package.tar.gz] [--no_skim]"
     echo ""
-    exit
+    exit 0
 }
 
-NANOAODPATH=$1
+NANOAODPATH=""
+PACKAGE=""
+SKIM=true
 
-if [ -z $1 ]; then usage; else NANOAODPATH=$1; fi
-if [ -z $2 ]; then PACKAGE="package.tar.gz"; else PACKAGE=$(realpath $2); fi
+# Parse arguments
+for arg in "$@"; do
+    key=$(echo $arg | cut -f1 -d=)
+    val=$(echo $arg | cut -f2 -d=)   
+    case "$key" in
+        -h) print_help;;
+        --input_file) NANOAODPATH=$val;;
+        --package) PACKAGE=$(realpath $val);;
+        --no_skim) SKIM=false;;
+    esac
+done
 
-echo "----------------------------------------------------"
-echo "Testing NanoAOD Skimming with the PACKAGE=${PACKAGE}"
-echo "on NanoAOD file NANOAODPATH=${NANOAODPATH}"
-echo "----------------------------------------------------"
-echo ""
+if [[ "$NANOAODPATH" == "" && "$SKIM" == "true" ]]; then
+    echo "ERROR: no input file provided!"
+    print_help
+fi
+
+if [[ "$SKIM" == "true" ]]; then
+    echo "----------------------------------------------------"
+    echo "Testing NanoAOD Skimming with the PACKAGE=${PACKAGE}"
+    echo "on NanoAOD file NANOAODPATH=${NANOAODPATH}"
+    echo "----------------------------------------------------"
+    echo ""
+else
+    echo "----------------------------------------------------"
+    echo "Generating NanoAOD Skimming package"
+    echo "----------------------------------------------------"
+    echo ""
+fi
 
 if [[ -f /opt/cms/cmsset_default.sh ]]; then
-    # On a CMSSW container (or pod)
+    # On a CMSSW container
     source /opt/cms/cmsset_default.sh
 elif [[ -f /cvmfs/cms.cern.ch/cmsset_default.sh ]]; then
     # On a machine with cvmfs
@@ -61,8 +84,9 @@ else
     git rev-parse HEAD > temp_dir/${CMSSWVERSION}/src/PhysicsTools/NanoAODTools/githash.txt
 
     # Compile with CMSSW
-    cd temp_dir/${CMSSWVERSION}/src/PhysicsTools/NanoAODTools/
+    cd temp_dir/${CMSSWVERSION}/src
     cmsenv
+    cd PhysicsTools/NanoAODTools/
     scram b -j
 
     # Setup NanoCORE
@@ -83,21 +107,23 @@ else
     mv package.tar.gz $ORIG_DIR/
 fi
 
-cd PhysicsTools/NanoAODTools
-eval `scramv1 runtime -sh`
-scram b -j
+if [[ "$SKIM" == "true" ]]; then
+    cd PhysicsTools/NanoAODTools
+    eval `scramv1 runtime -sh`
+    scram b -j
 
-python scripts/nano_postproc.py \
-    ./ \
-    ${NANOAODPATH} \
-    -b python/postprocessing/examples/keep_and_drop.txt \
-    -I PhysicsTools.NanoAODTools.postprocessing.examples.vbsHwwSkimModule \
-    vbsHwwSkimModuleConstr
+    python scripts/nano_postproc.py \
+        ./ \
+        ${NANOAODPATH} \
+        -b python/postprocessing/examples/keep_and_drop.txt \
+        -I PhysicsTools.NanoAODTools.postprocessing.examples.vbsHwwSkimModule \
+        vbsHwwSkimModuleConstr
 
-# Copy back the output to parent directory
-BASENAMEWITHEXT=$(basename ${NANOAODPATH})
-BASENAME=${BASENAMEWITHEXT%.*}
-cp ${BASENAME}_Skim.root $ORIG_DIR/${BASENAME}_skimmed.root
+    # Copy back the output to parent directory
+    BASENAMEWITHEXT=$(basename ${NANOAODPATH})
+    BASENAME=${BASENAMEWITHEXT%.*}
+    mv ${BASENAME}_Skim.root $ORIG_DIR/${BASENAME}_skimmed.root
+fi
 
 # Clean up
 cd $ORIG_DIR
