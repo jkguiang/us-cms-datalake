@@ -35,9 +35,9 @@ import uproot3_methods
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-uproot_file = uproot.open("${input_file}")
+uproot_file = uproot3.open("${input_file}")
 ttree = uproot_file["Events"]
-mu_p4s = uproot_methods.TLorentzVectorArray.from_ptetaphim( 
+mu_p4s = uproot3_methods.TLorentzVectorArray.from_ptetaphim( 
     *ttree.arrays(["Muon_pt","Muon_eta","Muon_phi","Muon_mass"],
     outputtype=tuple, entrystop=100000) 
  )
