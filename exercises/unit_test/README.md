@@ -6,7 +6,7 @@
 
 (Optional) You can also run the test 'locally' by using the included python file:
 ```
-python unit_test.py --input_file=root://cache.url:port//path/to/file
+python unit_test.py --input_file=root://cache:port//path/to/file
 ```
 If you choose to do this, be sure that you have the following packages installed: `uproot3`, `numpy`, `matplotlib`, `pandas`
 
@@ -18,4 +18,9 @@ kubectl create configmap datalake-test-exe-configmap --from-file=run.sh
 3. Deploy pod
 ```
 kubectl create -f deploy.yaml
+```
+
+4. Run the test
+```
+sh run.sh --input_file=root://cache:port//path/to/file
 ```
