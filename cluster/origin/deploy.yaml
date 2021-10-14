@@ -36,10 +36,10 @@ spec:
           limits:
             cpu: 48
             memory: 100Gi
-            ephemeral-storage: 20Gi
+            ephemeral-storage: 100Gi
           requests:
-            cpu: 1
-            memory: 2Gi
+            cpu: 2
+            memory: 4Gi
             ephemeral-storage: 10Gi
         volumeMounts:
         - mountPath: /mnt
@@ -50,9 +50,9 @@ spec:
         - mountPath: /etc/scitokens/scitokens.cfg
           name: origin-conf
           subPath: scitokens.cfg
-        - mountPath: /etc/xrootd/auth-file-noauth
+        - mountPath: /etc/xrootd/auth-file
           name: origin-conf
-          subPath: auth-file-noauth
+          subPath: auth-file
         - mountPath: /etc/supervisord.d/10-xrootd.conf
           name: origin-supervisor
           subPath: supervisord.conf
@@ -73,8 +73,8 @@ spec:
             path: xrootd.cfg
           - key: scitokens.cfg
             path: scitokens.cfg
-          - key: auth-file-noauth
-            path: auth-file-noauth
+          - key: auth-file
+            path: auth-file
       - name: origin-supervisor
         configMap: 
           name: origin-supervisor

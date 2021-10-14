@@ -34,11 +34,11 @@ spec:
         name: us-cms-datalake-origin-redi
         resources:
           limits:
-            cpu: 20
-            memory: 20Gi
+            cpu: 48
+            memory: 100Gi
           requests:
             cpu: 2
-            memory: 2Gi
+            memory: 4Gi
         volumeMounts:
         - mountPath: /mnt
           name: ephemeral
@@ -48,9 +48,9 @@ spec:
         - mountPath: /etc/scitokens/scitokens.cfg
           name: xrootd-redi-conf
           subPath: scitokens.cfg
-        - mountPath: /etc/xrootd/auth-file-noauth
+        - mountPath: /etc/xrootd/auth-file
           name: xrootd-redi-conf
-          subPath: auth-file-noauth
+          subPath: auth-file
         - mountPath: /etc/supervisord.d/10-xrootd.conf
           name: xrootd-redi-supervisor
           subPath: supervisord.conf
@@ -71,8 +71,8 @@ spec:
             path: xrootd.cfg
           - key: scitokens.cfg
             path: scitokens.cfg
-          - key: auth-file-noauth
-            path: auth-file-noauth
+          - key: auth-file
+            path: auth-file
       - name: xrootd-redi-supervisor
         configMap: 
           name: xrootd-redi-supervisor
