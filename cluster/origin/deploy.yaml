@@ -47,7 +47,7 @@ spec:
         - mountPath: /etc/xrootd/xrootd.cfg
           name: origin-conf
           subPath: xrootd.cfg
-        - mountPath: /etc/scitokens/scitokens.cfg
+        - mountPath: /etc/xrootd/scitokens.cfg
           name: origin-conf
           subPath: scitokens.cfg
         - mountPath: /etc/xrootd/auth-file
