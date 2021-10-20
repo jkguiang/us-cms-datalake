@@ -5,10 +5,8 @@ OUTPUTDIR=$1
 OUTPUTNAME=$2
 INPUTFILENAMES=$3
 IFILE=$4
-# CMSSWVERSION=$5 # We will be overriding by hand with the following
-# SCRAMARCH=$6 # We will be overriding by hand with the following
-CMSSWVERSION=CMSSW_10_6_25
-SCRAMARCH=slc7_amd64_gcc700
+CMSSWVERSION=$5
+SCRAMARCH=$6
 
 function getjobad {
     grep -i "^$1" "$_CONDOR_JOB_AD" | cut -d= -f2- | xargs echo
@@ -65,8 +63,11 @@ function stageout {
     fi
 }
 
-# Make sure OUTPUTNAME doesn't have .root since we add it manually
+# Fetch custom ClassAds values
 XROOTDHOST="$(getjobad XRootDHost)"
+USEPYTHON2="$(getjobad UsePython2)"
+
+# Make sure OUTPUTNAME doesn't have .root since we add it manually
 OUTPUTNAME=$(echo $OUTPUTNAME | sed 's/\.root//')
 
 setup_chirp
@@ -102,12 +103,19 @@ else
 fi
 
 # Setup environment and build
+# export SCRAM_ARCH=${SCRAMARCH} && scramv1 project CMSSW ${CMSSWVERSION}
+# cd ${CMSSWVERSION}/src/
+# tar xvf ../../package.tar.gz
+# cd PhysicsTools/NanoAODTools/
+# eval `scramv1 runtime -sh`
+# scram b
 export SCRAM_ARCH=${SCRAMARCH} && scramv1 project CMSSW ${CMSSWVERSION}
 cd ${CMSSWVERSION}/src/
-tar xvf ../../package.tar.gz
-cd PhysicsTools/NanoAODTools/
 eval `scramv1 runtime -sh`
-scram b
+tar xvf ../../package.tar.gz
+cd NanoAODTools/
+bash standalone/env_standalone.sh build
+source standalone/env_standalone.sh
 
 echo "before running: ls -lrth"
 ls -lrth 
@@ -151,8 +159,7 @@ localpath=$(echo ${INPUTFILENAMES} | sed 's/^.*\(\/store.*\).*$/\1/')
 INPUTFILE=root://${XROOTDHOST}/${localpath}
 #------------------------------------------------------------------------------------------------------------------------------>
 
-# echo 'void check_xrd(TString filename) { TFile* f = TFile::Open(filename.Data()); TTree* t = (TTree*) f->Get("Events"); ((TTreePlayer*)(t->GetPlayer()))->SetScanRedirect(true); ((TTreePlayer*)(t->GetPlayer()))->SetScanFileName("output.dat"); t->Scan("*", "", "", 10); }' > check_xrd.C
-echo "Checking xcache health..." | tee >(cat >&2)
+echo "Checking XRootD host's health..." | tee >(cat >&2)
 root -l -b -q check_xrd.C\(\"${INPUTFILE}\"\) > >(tee check_xrd.txt) 2> >(tee check_xrd_stderr.txt >&2)
 rm -f output.dat # Delete the file as it is not needed
 
@@ -162,16 +169,15 @@ if grep -q "badread" check_xrd_stderr.txt; then
     cat check_xrd_stderr.txt
     exit 1
 else
-    "XCache seems to be in working order :)"
+    echo "XRootD host seems to be in working order :)"
 fi
 
 # Figuring out nevents and neff_weights
-if [[ "${INPUTFILE}" == *"/NANOAOD/"* ]]; then # Relies on "/NANOAOD/" being present for data files. Perhaps not the brightest idea, however it seems to work for now.
-    # echo 'void count_events(TString filename) { TFile* f = TFile::Open(filename.Data()); TTree* Events = (TTree*) f->Get("Events"); std::cout << Events->GetEntries() << std::endl; std::cout << Events->GetEntries() << std::endl;  std::cout << Events->GetEntries() << std::endl; }' > count_events.C
+# Note: Relies on "/NANOAOD/" being present for data files. Perhaps not the brightest idea, however it seems to work for now.
+if [[ "${INPUTFILE}" == *"/NANOAOD/"* ]]; then
     echo "Running count_all_events on all events" | tee >(cat >&2)
     root -l -b -q count_all_events.C\(\"${INPUTFILE}\"\) > >(tee nevents.txt) 2> >(tee nevents_stderr.txt >&2)
 else
-    # echo 'void count_events(TString filename) { TFile* f = TFile::Open(filename.Data()); TTree* Events = (TTree*) f->Get("Events"); std::cout << Events->Draw("(Generator_weight>0)-(Generator_weight<0)", "", "goff") << std::endl; std::cout << Events->Draw("(Generator_weight>0)-(Generator_weight<0)", "((Generator_weight>0)-(Generator_weight<0))>0", "goff") << std::endl;  std::cout << Events->Draw("(Generator_weight>0)-(Generator_weight<0)", "((Generator_weight>0)-(Generator_weight<0))<0", "goff") << std::endl; }' > count_events.C
     echo "Running count_eff_events on all events" | tee >(cat >&2)
     root -l -b -q count_eff_events.C\(\"${INPUTFILE}\"\) > >(tee nevents.txt) 2> >(tee nevents_stderr.txt >&2)
 fi
@@ -185,10 +191,17 @@ if [[ $RUN_STATUS != 0 ]]; then
 fi
 
 # Run the postprocessor
-CMD="python scripts/nano_postproc.py \
-    ./ ${INPUTFILE} \
-    -b python/postprocessing/examples/keep_and_drop.txt \
-    -I PhysicsTools.NanoAODTools.postprocessing.examples.vbsHwwSkimModule vbsHwwSkimModuleConstr"
+if [[ "$USEPYTHON2" != "" ]]; then
+    CMD="python2 scripts/nano_postproc.py \
+        ./ ${INPUTFILE} \
+        -b python/postprocessing/examples/keep_and_drop.txt \
+        -I PhysicsTools.NanoAODTools.postprocessing.examples.vbsHwwSkimModule vbsHwwSkimModuleConstr"
+else
+    CMD="python3 scripts/nano_postproc.py \
+        ./ ${INPUTFILE} \
+        -b python/postprocessing/examples/keep_and_drop.txt \
+        -I PhysicsTools.NanoAODTools.postprocessing.examples.vbsHwwSkimModule vbsHwwSkimModuleConstr"
+fi
 echo $CMD
 echo "Running nano_postproc.py" | tee >(cat >&2)
 $CMD > >(tee nano_postproc.txt) 2> >(tee nano_postproc_stderr.txt >&2)
@@ -210,12 +223,11 @@ echo "mv ${NANOPOSTPROCOUTPUTFILENAME}_Skim.root output.root"
 mv ${NANOPOSTPROCOUTPUTFILENAME}_Skim.root output.root
 
 # Figuring out nevents and neff_weights
-if [[ "${INPUTFILE}" == *"/NANOAOD/"* ]]; then # Relies on "/NANOAOD/" being present for data files. Perhaps not the brightest idea, however it seems to work for now.
-    # echo 'void count_events(TString filename) { TFile* f = TFile::Open(filename.Data()); TTree* Events = (TTree*) f->Get("Events"); std::cout << Events->GetEntries() << std::endl; std::cout << Events->GetEntries() << std::endl;  std::cout << Events->GetEntries() << std::endl; }' > count_events.C
+# Note: Relies on "/NANOAOD/" being present for data files. Perhaps not the brightest idea, however it seems to work for now.
+if [[ "${INPUTFILE}" == *"/NANOAOD/"* ]]; then
     echo "Running count_all_events on skimmed events" | tee >(cat >&2)
     root -l -b -q count_all_events.C\(\"output.root\"\) > >(tee nevents_skimmed.txt) 2> >(tee nevents_skimmed_stderr.txt >&2)
 else
-    # echo 'void count_events(TString filename) { TFile* f = TFile::Open(filename.Data()); TTree* Events = (TTree*) f->Get("Events"); std::cout << Events->Draw("(Generator_weight>0)-(Generator_weight<0)", "", "goff") << std::endl; std::cout << Events->Draw("(Generator_weight>0)-(Generator_weight<0)", "((Generator_weight>0)-(Generator_weight<0))>0", "goff") << std::endl;  std::cout << Events->Draw("(Generator_weight>0)-(Generator_weight<0)", "((Generator_weight>0)-(Generator_weight<0))<0", "goff") << std::endl; }' > count_events.C
     echo "Running count_eff_events on skimmed events" | tee >(cat >&2)
     root -l -b -q count_eff_events.C\(\"output.root\"\) > >(tee nevents_skimmed.txt) 2> >(tee nevents_skimmed_stderr.txt >&2)
 fi
