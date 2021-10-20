@@ -2,13 +2,18 @@
 0. Ensure Data Lake prototype is set up (cf. parent dir)
 
 1. Create the skimmer package
+    - Ensure that you have ROOT available (e.g. in a CMSSW env), since it is needed to compile NanoCORE
 ```
 sh run.sh --no_skim
 ```
-
-2. Move it somewhere that is publicly accessible
+(Optional) Run the skimmer locally
 ```
-mv package.tar.gz ~/public_html/dump/package.tar.gz
+sh run.sh --input_file=root://cache:2094//path/to/file.root --package=/path/to/package.tar.gz
+```
+
+2. Make a copy of it somewhere that is publicly accessible
+```
+cp package.tar.gz ~/public_html/dump/package.tar.gz
 chmod 755 ~/public_html/dump/package.tar.gz
 ```
 
