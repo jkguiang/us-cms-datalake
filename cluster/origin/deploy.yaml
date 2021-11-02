@@ -5,7 +5,7 @@ metadata:
     k8s-app: us-cms-datalake-origin
   name: us-cms-datalake-origin
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       k8s-app: us-cms-datalake-origin
@@ -56,8 +56,12 @@ spec:
         - mountPath: /etc/supervisord.d/10-xrootd.conf
           name: origin-supervisor
           subPath: supervisord.conf
-      # nodeSelector:
-      #   kubernetes.io/hostname: k8s-igrok-02.calit2.optiputer.net
+        - mountPath: /etc/grid-security/hostcert.pem
+          name: hostcert
+        - mountPath: /etc/grid-security/hostkey.pem
+          name: hostkey
+      nodeSelector:
+        kubernetes.io/hostname: k8s1-pb10.ultralight.org
       dnsPolicy: Default
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -81,3 +85,11 @@ spec:
           items:
           - key: supervisord.conf
             path: supervisord.conf
+      - name: hostcert
+        hostPath:
+          path: /etc/grid-security/hostcert.pem
+          type: File
+      - name: hostkey
+        hostPath:
+          path: /etc/grid-security/hostkey.pem
+          type: File
