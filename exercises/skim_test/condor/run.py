@@ -2,12 +2,11 @@ import argparse
 import time
 import os
 
-from metis.Sample import DBSSample, DirectorySample
 from metis.CondorTask import CondorTask
 from metis.StatsParser import StatsParser
 from metis.Utils import good_sites
 
-from samples import samples_UL as samples
+from samples import skim_test_samples as samples
 
 NAME = "DataLakeSkimTests"
 
@@ -25,6 +24,10 @@ cli.add_argument(
 cli.add_argument(
     "--tag", type=str, required=True,
     help="Unique tag for submissions"
+)
+cli.add_argument(
+    "--xrootd_protocol", type=str, default="root",
+    help="File transfer protocol for XRootD to use"
 )
 cli.add_argument(
     "--xrootd_host", type=str, default="xcache-redirector.t2.ucsd.edu:2042",
@@ -58,7 +61,7 @@ if not os.path.isfile(args.package):
 # Assemble condor_submit parameters
 condor_submit_params = {
     "sites": ",".join(args.sites), 
-    "classads": [["XRootDHost", args.xrootd_host]]
+    "classads": [["XRootDHost", args.xrootd_host], ["XRootDProtocol", args.xrootd_protocol]],
 }
 if args.python2:
     condor_submit_params["classads"].append(["UsePython2", "true"])
@@ -71,16 +74,23 @@ if "BEARER_TOKEN" in os.environ.keys():
 elif "BEARER_TOKEN_FILE" in os.environ.keys():
     token_file = os.environ["BEARER_TOKEN_FILE"]
 elif "XDG_RUNTIME_DIR" in os.environ.keys():
-    token_file = "{0}/bt_u{1}".format(os.environ['XDG_RUNTIME_DIR'], os.getuid())
-elif os.path.isfile("/tmp/bt_u{}".format(os.getuid())):
+    token_file = "{0}/bt_u{1}".format(os.environ["XDG_RUNTIME_DIR"], os.getuid())
+    if not os.path.isfile(token_file):
+        token_file = ""
+
+if token_file == "" and os.path.isfile("/tmp/bt_u{}".format(os.getuid())):
     token_file = "/tmp/bt_u{}".format(os.getuid())
 
 if token_file != "" and os.path.isfile(token_file):
-    condor_submit_params["classads"].append(["use_scitokens", "Auto"])
-    condor_submit_params["classads"].append(["scitokens_file", token_file])
+    print("Found token file: {}".format(token_file))
+    condor_submit_params["extra_commands"] = []
+    # condor_submit_params["extra_commands"].append(["use_scitokens", "True"])
+    # condor_submit_params["extra_commands"].append(["scitokens_file", token_file])
+    condor_submit_params["extra_commands"].append(["encrypt_input_files", token_file])
+    condor_submit_params["classads"].append(["SciTokenFilename", token_file.split("/")[-1]])
 
 if args.debug:
-    samples = [samples[0]]
+    samples = samples[:1]
     max_jobs = 1
 else:
     max_jobs = 0
@@ -100,6 +110,7 @@ for _ in range(n_updates): # update every 30 mins
             cmssw_version=CMSSW_VERSION,
             scram_arch=SCRAM_ARCH,
             input_executable="condor_executable_metis.sh", # your condor executable here
+            additional_input_files=[token_file] if token_file != "" else [],
             tarfile=args.package, # your tarfile with assorted goodies here
             special_dir="{0}/{1}".format(NAME, args.tag), # output files into /hadoop/cms/store/<user>/<special_dir>
             max_jobs=max_jobs

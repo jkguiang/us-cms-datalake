@@ -112,7 +112,6 @@ if [[ "$SKIM" == "true" ]]; then
             -I PhysicsTools.NanoAODTools.postprocessing.examples.vbsHwwSkimModule \
             vbsHwwSkimModuleConstr
     fi
-
     # Copy back the output to parent directory
     BASENAMEWITHEXT=$(basename ${NANOAODPATH})
     BASENAME=${BASENAMEWITHEXT%.*}

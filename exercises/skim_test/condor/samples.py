@@ -1,6 +1,7 @@
 #!/bin/env python
 
-from metis.Sample import DBSSample, DirectorySample
+from metis.Sample import FilelistSample, DBSSample, DirectorySample
+from metis.File import EventsFile
 
 # Specify a dataset name and a short name for the output root file on nfs
 samples_v7 = [
@@ -512,4 +513,9 @@ samples_UL = [
 
         ]
 
-samples = samples_UL
+skim_test_samples = [
+    FilelistSample(
+        filelist=["VBSWWH_C2V_4p5_RunIIAutumn18NanoAOD_VBSWWH_C2V_4p5_v3_ext1_merged.root"], 
+        dataset="/DataLakeSkimTestSampleVBSWWH/NANOAODSIM"
+    ),
+]

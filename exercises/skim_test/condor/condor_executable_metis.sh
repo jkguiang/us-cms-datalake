@@ -65,7 +65,13 @@ function stageout {
 
 # Fetch custom ClassAds values
 XROOTDHOST="$(getjobad XRootDHost)"
+XROOTDPROTOCOL="$(getjobad XRootDProtocol)"
 USEPYTHON2="$(getjobad UsePython2)"
+SCITOKENFILENAME="$(getjobad SciTokenFilename)"
+
+if [[ "${SCITOKENFILENAME}" != "" ]]; then
+    export BEARER_TOKEN_FILE="$PWD/$SCITOKENFILENAME"
+fi
 
 # Make sure OUTPUTNAME doesn't have .root since we add it manually
 OUTPUTNAME=$(echo $OUTPUTNAME | sed 's/\.root//')
@@ -80,6 +86,7 @@ echo "IFILE: $IFILE"
 echo "CMSSWVERSION: $CMSSWVERSION"
 echo "SCRAMARCH: $SCRAMARCH"
 
+echo "BEARER_TOKEN_FILE: $BEARER_TOKEN_FILE"
 echo "GLIDEIN_CMSSite: $GLIDEIN_CMSSite"
 echo "hostname: $(hostname)"
 echo "uname -a: $(uname -a)"
@@ -87,6 +94,9 @@ echo "time: $(date +%s)"
 echo "args: $@"
 
 echo -e "\n--- end header output ---\n" #                       <----- section division
+
+echo "before unpacking: ls -lrth"
+ls -lrth 
 
 if [ -r "$OSGVO_CMSSW_Path"/cmsset_default.sh ]; then
     echo "sourcing environment: source $OSGVO_CMSSW_Path/cmsset_default.sh"
@@ -103,12 +113,6 @@ else
 fi
 
 # Setup environment and build
-# export SCRAM_ARCH=${SCRAMARCH} && scramv1 project CMSSW ${CMSSWVERSION}
-# cd ${CMSSWVERSION}/src/
-# tar xvf ../../package.tar.gz
-# cd PhysicsTools/NanoAODTools/
-# eval `scramv1 runtime -sh`
-# scram b
 export SCRAM_ARCH=${SCRAMARCH} && scramv1 project CMSSW ${CMSSWVERSION}
 cd ${CMSSWVERSION}/src/
 eval `scramv1 runtime -sh`
@@ -121,6 +125,11 @@ echo "before running: ls -lrth"
 ls -lrth 
 
 echo -e "\n--- begin running ---\n" #                           <----- section division
+
+# Edit .rootrc
+cat > ${HOME}/.rootrc << EOL
+Davix.GSI.CACheck: n
+EOL
 
 #------------------------------------------------------------------------------------------------------------------------------>
 cat > check_xrd.C << EOL
@@ -156,7 +165,7 @@ EOL
 
 #------------------------------------------------------------------------------------------------------------------------------>
 localpath=$(echo ${INPUTFILENAMES} | sed 's/^.*\(\/store.*\).*$/\1/')
-INPUTFILE=root://${XROOTDHOST}/${localpath}
+INPUTFILE=${XROOTDPROTOCOL}://${XROOTDHOST}/${localpath}
 #------------------------------------------------------------------------------------------------------------------------------>
 
 echo "Checking XRootD host's health..." | tee >(cat >&2)
