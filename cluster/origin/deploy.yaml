@@ -20,17 +20,12 @@ spec:
       labels:
         k8s-app: us-cms-datalake-origin
     spec:
-      hostNetwork: true
       containers:
       - image: jguiang/us-cms-datalake-cluster:latest
         imagePullPolicy: Always
-        env:
-        - name: OSG_FQDN
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName 
         ports:
-        - containerPort: 2094
+        - containerPort: 8080
+          hostPort: 8080
         name: us-cms-datalake-origin
         resources:
           limits:
@@ -38,8 +33,8 @@ spec:
             memory: 100Gi
             ephemeral-storage: 100Gi
           requests:
-            cpu: 2
-            memory: 4Gi
+            cpu: 4
+            memory: 8Gi
             ephemeral-storage: 10Gi
         volumeMounts:
         - mountPath: /mnt
