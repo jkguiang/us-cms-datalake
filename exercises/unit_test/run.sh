@@ -38,8 +38,7 @@ import matplotlib.pyplot as plt
 uproot_file = uproot3.open("${input_file}")
 ttree = uproot_file["Events"]
 mu_p4s = uproot3_methods.TLorentzVectorArray.from_ptetaphim( 
-    *ttree.arrays(["Muon_pt","Muon_eta","Muon_phi","Muon_mass"],
-    outputtype=tuple, entrystop=100000) 
+    *ttree.arrays(["Muon_pt","Muon_eta","Muon_phi","Muon_mass"], outputtype=tuple, entrystop=100000) 
  )
 dimuon_mass = (lambda x:x.i0+x.i1+x.i2+x.i3)(mu_p4s.choose(4)[:,:1]).mass
 pd.Series(dimuon_mass.flatten()).plot.hist(bins=np.linspace(0,200,100), logy=False)
