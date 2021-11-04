@@ -21,10 +21,10 @@ spec:
         k8s-app: us-cms-datalake-cache
     spec:
       hostNetwork: true
-      tolerations:
-      - key: "nautilus.io/stashcache"
-        operator: "Exists"
-        effect: "NoSchedule"
+#      tolerations:
+#      - key: "nautilus.io/stashcache"
+#        operator: "Exists"
+#        effect: "NoSchedule"
       containers:
       - image: jguiang/us-cms-datalake-cluster:latest
         imagePullPolicy: Always
@@ -42,7 +42,7 @@ spec:
             memory: 100Gi
           requests:
             cpu: 10 
-            memory: 20Gi
+            memory: 10Gi
         volumeMounts:
         - mountPath: /mnt
           name: datalake-cache-pervol
@@ -62,12 +62,13 @@ spec:
       restartPolicy: Always
       schedulerName: default-scheduler
       terminationGracePeriodSeconds: 30
-      nodeSelector:
-        kubernetes.io/hostname: stashcache.t2.ucsd.edu
+#      nodeSelector:
+#        kubernetes.io/hostname: stashcache.t2.ucsd.edu
       volumes:
       - name: datalake-cache-pervol
-        persistentVolumeClaim:
-          claimName: pvc-osg-stashcache.t2.ucsd.edu-7 
+        emptyDir: {}
+#        persistentVolumeClaim:
+#          claimName: pvc-osg-stashcache.t2.ucsd.edu-7 
       - name: cache-conf
         configMap: 
           name: cache-conf
