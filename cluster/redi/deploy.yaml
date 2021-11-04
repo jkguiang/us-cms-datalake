@@ -19,18 +19,14 @@ spec:
       labels:
         k8s-app: us-cms-datalake-origin-redi
     spec:
-      hostNetwork: true
       containers:
       - image: jguiang/us-cms-datalake-cluster:latest
         imagePullPolicy: Always
-        env:
-        - name: OSG_FQDN
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName 
         ports:
-        - containerPort: 2094
-        - containerPort: 2213
+        - containerPort: 1094
+          hostPort: 1094
+        - containerPort: 8000
+          hostPort: 8000
         name: us-cms-datalake-origin-redi
         resources:
           limits:
@@ -54,8 +50,12 @@ spec:
         - mountPath: /etc/supervisord.d/10-xrootd.conf
           name: xrootd-redi-supervisor
           subPath: supervisord.conf
-      # nodeSelector:
-      #   kubernetes.io/hostname: k8s-igrok-02.calit2.ucsd.edu
+        - mountPath: /etc/grid-security/hostcert.pem
+          name: hostcert
+        - mountPath: /etc/grid-security/hostkey.pem
+          name: hostkey
+      nodeSelector:
+        kubernetes.io/hostname: k8s1-pb10.ultralight.org
       dnsPolicy: Default
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -79,3 +79,11 @@ spec:
           items:
           - key: supervisord.conf
             path: supervisord.conf
+      - name: hostcert
+        hostPath:
+          path: /etc/grid-security/hostcert.pem
+          type: File
+      - name: hostkey
+        hostPath:
+          path: /etc/grid-security/hostkey.pem
+          type: File
