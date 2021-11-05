@@ -20,7 +20,6 @@ spec:
       labels:
         k8s-app: us-cms-datalake-cache
     spec:
-      hostNetwork: True
       tolerations:
       - key: "nautilus.io/stashcache"
         operator: "Exists"
@@ -30,6 +29,7 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 9001
+          hostPort: 9001
         name: us-cms-datalake-cache
         resources:
           limits:
@@ -69,6 +69,7 @@ spec:
         kubernetes.io/hostname: stashcache.t2.ucsd.edu
       volumes:
       - name: datalake-cache-pervol
+        #emptyDir: {}
         persistentVolumeClaim:
           claimName: pvc-osg-stashcache.t2.ucsd.edu-7 
       - name: cache-conf
