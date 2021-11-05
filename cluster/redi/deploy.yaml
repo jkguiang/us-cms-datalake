@@ -19,14 +19,13 @@ spec:
       labels:
         k8s-app: us-cms-datalake-origin-redi
     spec:
+      hostNetwork: True
       containers:
       - image: jguiang/us-cms-datalake-cluster:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 1094
-          hostPort: 1094
-        - containerPort: 8000
-          hostPort: 8000
+        - containerPort: 9001
         name: us-cms-datalake-origin-redi
         resources:
           limits:
