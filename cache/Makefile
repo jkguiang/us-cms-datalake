@@ -1,4 +1,4 @@
 delete:
-	- kubectl delete -k ./
+	- kubectl delete -k ./ -n osg-services
 create:
-	- kubectl apply -k ./
+	- kubectl apply -k ./ -n osg-services

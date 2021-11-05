@@ -38,7 +38,7 @@ spec:
             ephemeral-storage: 20Gi
         volumeMounts:
         - mountPath: /mnt
-          name: ephemeral
+          name: datalake-origin-pervol
         - mountPath: /etc/xrootd/xrootd.cfg
           name: origin-conf
           subPath: xrootd.cfg
@@ -62,8 +62,9 @@ spec:
       schedulerName: default-scheduler
       terminationGracePeriodSeconds: 30
       volumes:
-      - name: ephemeral
-        emptyDir: {}
+      - name: datalake-origin-pervol
+        persistentVolumeClaim:
+          claimName: pvc-xrootd-data-lake-origin-caltech-k8s1-pb10-ultralight-org-persistent-7
       - name: origin-conf
         configMap: 
           name: origin-conf

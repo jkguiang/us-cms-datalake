@@ -36,7 +36,7 @@ spec:
             cpu: 48
             memory: 100Gi
           requests:
-            cpu: 10 
+            cpu: 8 
             memory: 10Gi
         volumeMounts:
         - mountPath: /mnt
@@ -69,7 +69,6 @@ spec:
         kubernetes.io/hostname: stashcache.t2.ucsd.edu
       volumes:
       - name: datalake-cache-pervol
-        #emptyDir: {}
         persistentVolumeClaim:
           claimName: pvc-osg-stashcache.t2.ucsd.edu-7 
       - name: cache-conf

@@ -15,4 +15,4 @@ generatorOptions:
   disableNameSuffixHash: true
 
 commonLabels:
-  app: xrootd-server-a
+  app: datalake-cache
