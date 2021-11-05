@@ -20,11 +20,10 @@ spec:
       labels:
         k8s-app: us-cms-datalake-cache
     spec:
-      hostNetwork: true
-#      tolerations:
-#      - key: "nautilus.io/stashcache"
-#        operator: "Exists"
-#        effect: "NoSchedule"
+      tolerations:
+      - key: "nautilus.io/stashcache"
+        operator: "Exists"
+        effect: "NoSchedule"
       containers:
       - image: jguiang/us-cms-datalake-cluster:latest
         imagePullPolicy: Always
@@ -34,7 +33,9 @@ spec:
             fieldRef:
               fieldPath: spec.nodeName 
         ports:
-        - containerPort: 2094
+        - containerPort: 9001
+          hostPort: 9001
+          protocol: TCP
         name: us-cms-datalake-cache
         resources:
           limits:
@@ -58,17 +59,24 @@ spec:
         - mountPath: /etc/supervisord.d/10-xrootd.conf
           name: cache-supervisor
           subPath: supervisord.conf
+        - mountPath: /etc/grid-security/hostcert.pem
+          name: certificate
+          readOnly: true
+          subPath: hostcert.pem
+        - mountPath: /etc/grid-security/hostkey.pem
+          name: hostkey
+          readOnly: true
+          subPath: hostkey.pem
       dnsPolicy: Default
       restartPolicy: Always
       schedulerName: default-scheduler
       terminationGracePeriodSeconds: 30
-#      nodeSelector:
-#        kubernetes.io/hostname: stashcache.t2.ucsd.edu
+      nodeSelector:
+        kubernetes.io/hostname: stashcache.t2.ucsd.edu
       volumes:
       - name: datalake-cache-pervol
-        emptyDir: {}
-#        persistentVolumeClaim:
-#          claimName: pvc-osg-stashcache.t2.ucsd.edu-7 
+        persistentVolumeClaim:
+          claimName: pvc-osg-stashcache.t2.ucsd.edu-7 
       - name: cache-conf
         configMap: 
           name: cache-conf
@@ -85,3 +93,17 @@ spec:
           items:
           - key: supervisord.conf
             path: supervisord.conf
+      - name: certificate
+        secret:
+          defaultMode: 384
+          items:
+          - key: hostcert.pem
+            path: hostcert.pem
+          secretName: ucsd-certs
+      - name: hostkey
+        secret:
+          defaultMode: 384
+          items:
+          - key: hostkey.pem
+            path: hostkey.pem
+          secretName: ucsd-certs
