@@ -20,6 +20,7 @@ spec:
       labels:
         k8s-app: us-cms-datalake-cache
     spec:
+      hostNetwork: True
       tolerations:
       - key: "nautilus.io/stashcache"
         operator: "Exists"
@@ -27,15 +28,8 @@ spec:
       containers:
       - image: jguiang/us-cms-datalake-cluster:latest
         imagePullPolicy: Always
-        env:
-        - name: OSG_FQDN
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName 
         ports:
         - containerPort: 9001
-          hostPort: 9001
-          protocol: TCP
         name: us-cms-datalake-cache
         resources:
           limits:
