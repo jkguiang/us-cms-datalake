@@ -51,6 +51,9 @@ spec:
         - mountPath: /etc/supervisord.d/10-xrootd.conf
           name: origin-supervisor
           subPath: supervisord.conf
+        - mountPath: /etc/grid-security/grid-mapfile
+          name: origin-conf
+          subPath: grid-mapfile
         - mountPath: /etc/grid-security/hostcert.pem
           name: hostcert
         - mountPath: /etc/grid-security/hostkey.pem
@@ -75,6 +78,8 @@ spec:
             path: scitokens.cfg
           - key: auth-file
             path: auth-file
+          - key: grid-mapfile
+            path: grid-mapfile
       - name: origin-supervisor
         configMap: 
           name: origin-supervisor

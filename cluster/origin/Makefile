@@ -1,4 +1,4 @@
 delete:
-	- kubectl delete -k ./
+	- kubectl delete -k ./ -n cms-admin
 create:
-	- kubectl apply -k ./
+	- kubectl apply -k ./ -n cms-admin

@@ -53,6 +53,15 @@ spec:
         - mountPath: /etc/supervisord.d/10-xrootd.conf
           name: cache-supervisor
           subPath: supervisord.conf
+        - mountPath: /etc/grid-security/voms-mapfile
+          name: cache-conf
+          subPath: voms-mapfile
+        - mountPath: /etc/cron.d/stash-cache-renew-proxy.cron
+          name: cache-conf
+          subPath: stash-cache-renew-proxy.cron
+        - mountPath: /usr/libexec/xcache/renew-proxy
+          name: cache-conf
+          subPath: renew-proxy
         - mountPath: /etc/grid-security/hostcert.pem
           name: certificate
           readOnly: true
@@ -81,6 +90,12 @@ spec:
             path: scitokens.cfg
           - key: auth-file
             path: auth-file
+          - key: voms-mapfile
+            path: voms-mapfile
+          - key: stash-cache-renew-proxy.cron
+            path: stash-cache-renew-proxy.cron
+          - key: renew-proxy
+            path: renew-proxy
       - name: cache-supervisor
         configMap: 
           name: cache-supervisor

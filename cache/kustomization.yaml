@@ -7,6 +7,9 @@ configMapGenerator:
       - xrootd.cfg
       - scitokens.cfg
       - auth-file
+      - voms-mapfile
+      - stash-cache-renew-proxy.cron
+      - renew-proxy
   - name: cache-supervisor
     files:
       - supervisord.conf
@@ -15,4 +18,4 @@ generatorOptions:
   disableNameSuffixHash: true
 
 commonLabels:
-  app: datalake-cache
+  app: us-cms-datalake-cache
