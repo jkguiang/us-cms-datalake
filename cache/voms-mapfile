@@ -1,1 +1,2 @@
+"/cms/Role=production/Capability=NULL" cmsprod
 "/cms/*" cmsuser
