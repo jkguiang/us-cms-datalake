@@ -515,7 +515,7 @@ samples_UL = [
 
 skim_test_samples = [
     FilelistSample(
-        filelist=["VBSWWH_C2V_4p5_RunIIAutumn18NanoAOD_VBSWWH_C2V_4p5_v3_ext1_merged.root"], 
+        filelist=["VBSWWH_C2V_4p5_RunIIAutumn18NanoAOD_VBSWWH_C2V_4p5_v3_ext1.root"], 
         dataset="/DataLakeSkimTestSampleVBSWWH/NANOAODSIM"
     ),
 ]

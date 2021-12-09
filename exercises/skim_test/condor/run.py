@@ -38,7 +38,7 @@ cli.add_argument(
     help="Skimmer package.tar.gz"
 )
 cli.add_argument(
-    "--sites", type=str, nargs="*", default=["T2_US_UCSD"],
+    "--sites", type=str, nargs="*", default=good_sites,
     help="Space-separated list of T2 sites"
 )
 cli.add_argument(
@@ -120,9 +120,9 @@ for _ in range(n_updates): # update every 30 mins
     for task in tasks:
         task.process()
         total_summary[task.get_sample().get_datasetname()] = task.get_task_summary()
-    # Update monitoring GUI
-    StatsParser(data=total_summary, webdir="~/public_html/{}_metis".format(NAME.lower())).do()
     if args.debug:
         break
+    # Update monitoring GUI
+    StatsParser(data=total_summary, webdir="~/public_html/{}_metis".format(NAME.lower())).do()
     # Wait 30 minutes
     time.sleep(30*60)

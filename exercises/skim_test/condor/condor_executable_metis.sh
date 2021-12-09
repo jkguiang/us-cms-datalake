@@ -165,7 +165,11 @@ EOL
 
 #------------------------------------------------------------------------------------------------------------------------------>
 localpath=$(echo ${INPUTFILENAMES} | sed 's/^.*\(\/store.*\).*$/\1/')
-INPUTFILE=${XROOTDPROTOCOL}://${XROOTDHOST}/${localpath}
+if [[ "${XROOTDPROTOCOL}" == *"http"* ]]; then
+    INPUTFILE=${XROOTDPROTOCOL}://${XROOTDHOST}/${localpath}
+else
+    INPUTFILE=${XROOTDPROTOCOL}://${XROOTDHOST}//${localpath}
+fi
 #------------------------------------------------------------------------------------------------------------------------------>
 
 echo "Checking XRootD host's health..." | tee >(cat >&2)
