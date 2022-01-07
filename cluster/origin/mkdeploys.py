@@ -26,13 +26,13 @@ if __name__ == "__main__":
             "redi_node": "k8s1-pb10.ultralight.org",
             "redi_port": "9001"
         }, 
-        {
-            "node": "k8s1-pb10.ultralight.org", 
-            "port": "2812",
-            "pvc": "pvc-xrootd-data-lake-origin-caltech-k8s1-pb10-ultralight-org-persistent-8",
-            "redi_node": "k8s1-pb10.ultralight.org",
-            "redi_port": "9001"
-        }, 
+        # {
+        #     "node": "k8s1-pb10.ultralight.org", 
+        #     "port": "2812",
+        #     "pvc": "pvc-xrootd-data-lake-origin-caltech-k8s1-pb10-ultralight-org-persistent-8",
+        #     "redi_node": "k8s1-pb10.ultralight.org",
+        #     "redi_port": "9001"
+        # }, 
     ]
     deployment_writer = OriginDeploymentWriter(
         base_dir="./", 
