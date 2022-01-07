@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: NAME_PLACEHOLDER
+  name: NAME_PLACEHOLDER
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: NAME_PLACEHOLDER
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        k8s-app: NAME_PLACEHOLDER
+    spec:
+      hostNetwork: True
+      containers:
+        - image: jguiang/us-cms-datalake-cluster:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: PORT_PLACEHOLDER
+          name: NAME_PLACEHOLDER
+          resources:
+            limits:
+              cpu: 48
+              memory: 100Gi
+              # ephemeral-storage: 50Gi
+            requests:
+              cpu: 4
+              memory: 4Gi
+              # ephemeral-storage: 20Gi
+          volumeMounts:
+            - mountPath: /mnt
+              name: datalake-origin-pervol
+            - mountPath: /etc/xrootd/xrootd.cfg
+              name: NAME_PLACEHOLDER-conf
+              subPath: xrootd.cfg
+            - mountPath: /etc/xrootd/scitokens.cfg
+              name: NAME_PLACEHOLDER-conf
+              subPath: scitokens.cfg
+            - mountPath: /etc/xrootd/auth-file
+              name: NAME_PLACEHOLDER-conf
+              subPath: auth-file
+            - mountPath: /etc/supervisord.d/10-xrootd.conf
+              name: NAME_PLACEHOLDER-supervisor
+              subPath: supervisord.conf
+            - mountPath: /etc/grid-security/grid-mapfile
+              name: NAME_PLACEHOLDER-conf
+              subPath: grid-mapfile
+            - mountPath: /etc/grid-security/certificates/5fca1cb1.0
+              name: NAME_PLACEHOLDER-conf
+              subPath: 5fca1cb1.0
+            - mountPath: /etc/grid-security/certificates/5fca1cb1.signing_policy
+              name: NAME_PLACEHOLDER-conf
+              subPath: 5fca1cb1.signing_policy
+            - mountPath: /etc/grid-security/hostcert.pem
+              name: hostcert
+            - mountPath: /etc/grid-security/hostkey.pem
+              name: hostkey
+      nodeSelector:
+        kubernetes.io/hostname: NODE_PLACEHOLDER
+      dnsPolicy: Default
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: datalake-origin-pervol
+          persistentVolumeClaim:
+            claimName: PVC_PLACEHOLDER
+        - name: NAME_PLACEHOLDER-conf
+          configMap: 
+            name: NAME_PLACEHOLDER-conf
+            items:
+              - key: xrootd.cfg
+                path: xrootd.cfg
+              - key: scitokens.cfg
+                path: scitokens.cfg
+              - key: auth-file
+                path: auth-file
+              - key: grid-mapfile
+                path: grid-mapfile
+              - key: 5fca1cb1.0
+                path: 5fca1cb1.0
+              - key: 5fca1cb1.signing_policy
+                path: 5fca1cb1.signing_policy
+        - name: NAME_PLACEHOLDER-supervisor
+          configMap: 
+            name: NAME_PLACEHOLDER-supervisor
+            items:
+            - key: supervisord.conf
+              path: supervisord.conf
+        - name: hostcert
+          hostPath:
+            path: /etc/grid-security/hostcert.pem
+            type: File
+        - name: hostkey
+          hostPath:
+            path: /etc/grid-security/hostkey.pem
+            type: File
